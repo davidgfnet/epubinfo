@@ -47,9 +47,10 @@ class EpubTestFiles(unittest.TestCase):
 				# Check results
 				self.assertEqual(res.title, refdata["title"])
 				self.assertEqual(res.description, refdata["description"])
-				self.assertEqual(res.identifier, refdata["identifier"])
+				self.assertEqual(res.identifiers, refdata["identifiers"])
 				self.assertEqual(res.language, refdata["language"])
 				self.assertEqual(res.subjects, refdata["subjects"])
+				self.assertEqual(res.dates, refdata["date"])
 				self.assertEqual(res.creators, refdata["creators"])
 				self.assertEqual(res.contributors, refdata["contributors"])
 				if refdata["cover"] is None:
@@ -62,9 +63,12 @@ class EpubTestFiles(unittest.TestCase):
 		"accessible_epub_3": {
 			"title": "Accessible EPUB 3",
 			"description": None,
-			"identifier": "urn:isbn:9781449328030",
+			"identifiers": [
+				{"value": "urn:isbn:9781449328030"},
+			],
 			"language": "en",
 			"subjects": [],
+			"date": {"": "2012-02-20"},
 			"creators": {
 				"Matt Garrish": {},
 			},
@@ -81,9 +85,12 @@ class EpubTestFiles(unittest.TestCase):
 		"cc-shared-culture": {
 			"title": "Creative Commons - A Shared Culture",
 			"description": "Multiple video tests (see Navigation Document (toc) for details)",
-			"identifier": "code.google.com.epub-samples.cc-shared-culture",
+			"identifiers": [
+				{"value": "code.google.com.epub-samples.cc-shared-culture"},
+			],
 			"language": "en-US",
 			"subjects": [],
+			"date": {},
 			"creators": {
 				"Jesse Dylan": {},
 			},
@@ -95,9 +102,12 @@ class EpubTestFiles(unittest.TestCase):
 		"moby-dick": {
 			"title": "Moby-Dick",
 			"description": None,
-			"identifier": "code.google.com.epub-samples.moby-dick-basic",
+			"identifiers": [
+				{"value": "code.google.com.epub-samples.moby-dick-basic"},
+			],
 			"language": "en-US",
 			"subjects": ["Adventures", "Novel"],
+			"date": {},
 			"creators": {
 				"Herman Melville": {"role": set(["aut"]), "file-as": "MELVILLE, HERMAN"},
 			},
@@ -109,9 +119,15 @@ class EpubTestFiles(unittest.TestCase):
 		"torture": {
 			"title": "This is an example title",
 			"description": None,
-			"identifier": "someid",
+			"identifiers": [
+				{"value": "someid"},
+				{"scheme": "isbn", "value": "9780000000001"},
+				{"scheme": "doi", "value": "doi:10.1016/j.iheduc.2008.03.001"},
+				{"scheme": "uuid", "value": "50f9f8b1-8a81-4dd5-b104-0766188d7d2c"},
+			],
 			"language": "en",
 			"subjects": [],
+			"date": {"": "2012-02-20", "modification": "2018-11-19"},
 			"creators": {
 				"Matt Garrish": {"role": set(["aut", "edt"])},
 			},
@@ -128,12 +144,26 @@ class EpubTestFiles(unittest.TestCase):
 		"WCAG": {
 			"title": "World Cultures and Geography",
 			"description": None,
-			"identifier": "41f1328c-0571-4e71-8be8-e65bc148281a",
+			"identifiers": [
+				{"value": "41f1328c-0571-4e71-8be8-e65bc148281a"},
+			],
 			"language": "en-US",
 			"subjects": [],
+			"date": {},
 			"creators": {},
 			"contributors": {},
-			"cover": None,																																																																								
+			"cover": None,
+		},
+		"covertest": {
+			"title": "Some title",
+			"description": "Lorem ipsum.",
+			"identifiers": [],
+			"language": None,
+			"subjects": [],
+			"date": {},
+			"creators": {'Foo Bar': {'file-as': 'Foo Bar', 'role': {'aut'}}},
+			"contributors": {},
+			"cover": "f2f18ddff9003fd06590c6e94a8a6848b48c6566560d6dddd86dd9445b9b81d5",
 		},
 	}
 

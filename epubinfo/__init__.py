@@ -24,7 +24,7 @@ class EpubFile(object):
     Attributes:
         title (str): Book title.
         language (str): Language code for the book content.
-        identifier (str): Book identifier.
+        identifiers (list): Book identifiers, with value and scheme.
         description (str): Book description, can be text or HTML.
         subjects (list): String list with several subjects.
         creators (dict): Dictionary of creator names to their role and other attributes.
@@ -63,10 +63,18 @@ class EpubFile(object):
 		# Proceed to process well-known fields (some are optional and return None)
 		self.title = self._getmeta("title")
 		self.language = self._getmeta("language")
-		self.identifier = self._getmeta("identifier")
 		self.description = self._getmeta("description")
 		self.subjects = self._getmetamulti("subject")
 		self.meta = self._getmetafull("meta")
+
+		# Read identifiers and their schemas
+		self.identifiers = []
+		for ident in self._getmetafull("identifier"):
+			if "" in ident:
+				entry = {"value": ident[""]}
+				if "opf:scheme" in ident:
+					entry["scheme"] = ident["opf:scheme"]
+				self.identifiers.append(entry)
 		
 		# Load refines, some formats (epub3.2 but also older ones) use this instead of inline attrs
 		# <meta refines="#creator12" property="file-as">Smith, John</meta>
@@ -98,16 +106,19 @@ class EpubFile(object):
 			self.contributors[cname] = {k: v for k, v in self.contributors[cname].items() if v}
 
 		# Parse dates
-		# TODO
+		# <dc:date opf:event="modification/publication/creation">datehere</dc:date>
+		datenodes = self._getmetafull("date")
+		self.dates = { entry.get("opf:event", ""): entry[""] for entry in datenodes if "" in entry }
+
 		# Parse the cover metadata to extract the image
 		self.cover = None
 		if getcover:
 			# Extract all the items in the manifest first
 			items = []
-			for elem in opfxml.getElementsByTagName('manifest'):
+			for elem in opfxml.getElementsByTagNameNS('*', 'manifest'):
 				for child in elem.childNodes:
 					if child.nodeType == child.ELEMENT_NODE:
-						if child.tagName == "item":
+						if re.match("(.*:)?item", child.tagName):
 							items.append(child)
 
 			# Look for a meta that looks like:

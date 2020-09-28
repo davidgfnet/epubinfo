@@ -1,0 +1,21 @@
+<?xml version="1.0"  encoding="UTF-8"?>
+<opf:package xmlns:opf="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:calibre="http://calibre.kovidgoyal.net/2009/metadata" unique-identifier="bookid" version="2.0">
+  <opf:metadata>
+    <dc:title>Some title</dc:title>
+    <dc:creator opf:role="aut" opf:file-as="Foo Bar">Foo Bar</dc:creator>
+    <dc:description>Lorem ipsum.</dc:description>
+    <meta xmlns="http://www.idpf.org/2007/opf" content="0.7.2" name="Sigil version"/>
+    <meta xmlns="http://www.idpf.org/2007/opf" name="cover" content="cover.jpg"/>
+    <meta xmlns="http://www.idpf.org/2007/opf" name="calibre:title_sort" content="Some title"/>
+    <meta xmlns="http://www.idpf.org/2007/opf" name="calibre:user_categories" content="{}"/>
+    <meta xmlns="http://www.idpf.org/2007/opf" name="calibre:author_link_map" content="{&quot;Foo Bar&quot;: &quot;&quot;}"/>
+    <opf:meta name="calibre:timestamp" content="2009-01-01T10:10:10"/>
+  </opf:metadata>
+  <opf:manifest>
+    <opf:item href="Text/text.html" id="text.html" media-type="application/xhtml+xml"/>
+    <opf:item href="images/cover.jpg" id="cover.jpg" media-type="image/jpeg"/>
+  </opf:manifest>
+  <opf:spine toc="ncx">
+    <opf:itemref idref="text.html" linear="yes"/>
+  </opf:spine>
+</opf:package>
