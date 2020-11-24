@@ -12,26 +12,26 @@ class EpubFile(object):
 	"""
 	Extracts metadata info from a file object.
 
-    Processes the file object to extract metadata from it. It can optionally
-    extract the book cover as well. Can throw exceptions if the book is
-    completely malformed, however lack of metadata or cover art won't throw
-    any exceptions.
+	Processes the file object to extract metadata from it. It can optionally
+	extract the book cover as well. Can throw exceptions if the book is
+	completely malformed, however lack of metadata or cover art won't throw
+	any exceptions.
 
-    Args:
-        fileobj (obj): File Object of the file that will be processed.
-        getcover (boolean): Whether to extract the cover art from the book.
+	Args:
+		fileobj (obj): File Object of the file that will be processed.
+		getcover (boolean): Whether to extract the cover art from the book.
 
-    Attributes:
-        title (str): Book title.
-        language (str): Language code for the book content.
-        identifiers (list): Book identifiers, with value and scheme.
-        description (str): Book description, can be text or HTML.
-        subjects (list): String list with several subjects.
-        creators (dict): Dictionary of creator names to their role and other attributes.
-        contributors (dict): Dictionary of contributor names to their role and other attributes.
-        cover (bytes): Cover art bytes (if present).
+	Attributes:
+		title (str): Book title.
+		language (str): Language code for the book content.
+		identifiers (list): Book identifiers, with value and scheme.
+		description (str): Book description, can be text or HTML.
+		subjects (list): String list with several subjects.
+		creators (dict): Dictionary of creator names to their role and other attributes.
+		contributors (dict): Dictionary of contributor names to their role and other attributes.
+		cover (bytes): Cover art bytes (if present).
 
-    """
+	"""
 	def __init__(self, fileobj, getcover=False):
 		epubf = zipfile.ZipFile(fileobj, "r", allowZip64=True)
 		if "META-INF/container.xml" not in epubf.namelist():
