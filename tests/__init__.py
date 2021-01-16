@@ -66,7 +66,7 @@ class EpubTestFiles(unittest.TestCase):
 			"identifiers": [
 				{"value": "urn:isbn:9781449328030"},
 			],
-			"language": "en",
+			"language": ["en"],
 			"subjects": [],
 			"date": {"": "2012-02-20"},
 			"creators": {
@@ -88,7 +88,7 @@ class EpubTestFiles(unittest.TestCase):
 			"identifiers": [
 				{"value": "code.google.com.epub-samples.cc-shared-culture"},
 			],
-			"language": "en-US",
+			"language": ["en-US"],
 			"subjects": [],
 			"date": {},
 			"creators": {
@@ -105,7 +105,7 @@ class EpubTestFiles(unittest.TestCase):
 			"identifiers": [
 				{"value": "code.google.com.epub-samples.moby-dick-basic"},
 			],
-			"language": "en-US",
+			"language": ["en-US"],
 			"subjects": ["Adventures", "Novel"],
 			"date": {},
 			"creators": {
@@ -125,7 +125,7 @@ class EpubTestFiles(unittest.TestCase):
 				{"scheme": "doi", "value": "doi:10.1016/j.iheduc.2008.03.001"},
 				{"scheme": "uuid", "value": "50f9f8b1-8a81-4dd5-b104-0766188d7d2c"},
 			],
-			"language": "en",
+			"language": ["en-UK", "en-US"],
 			"subjects": [],
 			"date": {"": "2012-02-20", "modification": "2018-11-19"},
 			"creators": {
@@ -147,7 +147,7 @@ class EpubTestFiles(unittest.TestCase):
 			"identifiers": [
 				{"value": "41f1328c-0571-4e71-8be8-e65bc148281a"},
 			],
-			"language": "en-US",
+			"language": ["en-US"],
 			"subjects": [],
 			"date": {},
 			"creators": {},
@@ -158,7 +158,7 @@ class EpubTestFiles(unittest.TestCase):
 			"title": "Some title",
 			"description": "Lorem ipsum.",
 			"identifiers": [],
-			"language": None,
+			"language": [],
 			"subjects": [],
 			"date": {},
 			"creators": {'Foo Bar': {'file-as': 'Foo Bar', 'role': {'aut'}}},

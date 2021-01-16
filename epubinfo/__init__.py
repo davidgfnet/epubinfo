@@ -23,7 +23,7 @@ class EpubFile(object):
 
 	Attributes:
 		title (str): Book title.
-		language (str): Language code for the book content.
+		language (list): Language codes for the book content.
 		identifiers (list): Book identifiers, with value and scheme.
 		description (str): Book description, can be text or HTML.
 		subjects (list): String list with several subjects.
@@ -62,7 +62,7 @@ class EpubFile(object):
 
 		# Proceed to process well-known fields (some are optional and return None)
 		self.title = self._getmeta("title")
-		self.language = self._getmeta("language")
+		self.language = self._getmetamulti("language")
 		self.description = self._getmeta("description")
 		self.subjects = self._getmetamulti("subject")
 		self.meta = self._getmetafull("meta")
@@ -72,8 +72,8 @@ class EpubFile(object):
 		for ident in self._getmetafull("identifier"):
 			if "" in ident:
 				entry = {"value": ident[""]}
-				if "opf:scheme" in ident:
-					entry["scheme"] = ident["opf:scheme"]
+				if "scheme" in ident:
+					entry["scheme"] = ident["scheme"]
 				self.identifiers.append(entry)
 		
 		# Load refines, some formats (epub3.2 but also older ones) use this instead of inline attrs
@@ -108,7 +108,7 @@ class EpubFile(object):
 		# Parse dates
 		# <dc:date opf:event="modification/publication/creation">datehere</dc:date>
 		datenodes = self._getmetafull("date")
-		self.dates = { entry.get("opf:event", ""): entry[""] for entry in datenodes if "" in entry }
+		self.dates = { entry.get("event", ""): entry[""] for entry in datenodes if "" in entry }
 
 		# Parse the cover metadata to extract the image
 		self.cover = None
@@ -151,12 +151,12 @@ class EpubFile(object):
 		cname = elem[""]
 		attrs = {}
 		# Load role inline, if present, otherwise look for a refine
-		attrs["role"] = set([elem.get("opf:role", None)])
+		attrs["role"] = set([elem.get("role", None)])
 		if None in attrs["role"] and "id" in elem and elem["id"] in refines:
 			attrs["role"] = set(refines[elem["id"]].get("role", []))
 		attrs["role"] -= set([None])
 		# Same for file-as attribute
-		attrs["file-as"] = elem.get("opf:file-as", None)
+		attrs["file-as"] = elem.get("file-as", None)
 		if attrs["file-as"] is None and "id" in elem and elem["id"] in refines:
 			attrs["file-as"] = refines[elem["id"]].get("file-as", [None])[0]
 
@@ -184,7 +184,8 @@ class EpubFile(object):
 			if re.match("(.*:)?" + tag, field.tagName):
 				entry = {}
 				for attr in field.attributes.keys():
-					entry[attr] = field.getAttribute(attr)
+					cattr = attr.split(":")[-1]  # Strip namespace
+					entry[cattr] = field.getAttribute(attr)
 				if field.childNodes and field.childNodes[0].nodeType == field.childNodes[0].TEXT_NODE:
 					entry[""] = field.childNodes[0].nodeValue
 				ret.append(entry)
