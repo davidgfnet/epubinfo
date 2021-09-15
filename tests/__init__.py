@@ -46,6 +46,7 @@ class EpubTestFiles(unittest.TestCase):
 				res = epubinfo.EpubFile(fakefile, getcover=True)
 				# Check results
 				self.assertEqual(res.title, refdata["title"])
+				self.assertEqual(res.titles, refdata["titles"])
 				self.assertEqual(res.description, refdata["description"])
 				self.assertEqual(res.identifiers, refdata["identifiers"])
 				self.assertEqual(res.language, refdata["language"])
@@ -62,6 +63,7 @@ class EpubTestFiles(unittest.TestCase):
 	TEST_DATA = {
 		"accessible_epub_3": {
 			"title": "Accessible EPUB 3",
+			"titles": ["Accessible EPUB 3"],
 			"description": None,
 			"identifiers": [
 				{"value": "urn:isbn:9781449328030"},
@@ -84,6 +86,7 @@ class EpubTestFiles(unittest.TestCase):
 		},
 		"cc-shared-culture": {
 			"title": "Creative Commons - A Shared Culture",
+			"titles": ["Creative Commons - A Shared Culture"],
 			"description": "Multiple video tests (see Navigation Document (toc) for details)",
 			"identifiers": [
 				{"value": "code.google.com.epub-samples.cc-shared-culture"},
@@ -101,12 +104,13 @@ class EpubTestFiles(unittest.TestCase):
 		},
 		"moby-dick": {
 			"title": "Moby-Dick",
+			"titles": ["Moby-Dick"],
 			"description": None,
 			"identifiers": [
 				{"value": "code.google.com.epub-samples.moby-dick-basic"},
 			],
 			"language": ["en-US"],
-			"subjects": ["Adventures", "Novel"],
+			"subjects": ["Novel", "Adventures"],
 			"date": {},
 			"creators": {
 				"Herman Melville": {"role": set(["aut"]), "file-as": "MELVILLE, HERMAN"},
@@ -118,6 +122,7 @@ class EpubTestFiles(unittest.TestCase):
 		},
 		"torture": {
 			"title": "This is an example title",
+			"titles": ["This is an example title"],
 			"description": None,
 			"identifiers": [
 				{"value": "someid"},
@@ -125,7 +130,7 @@ class EpubTestFiles(unittest.TestCase):
 				{"scheme": "doi", "value": "doi:10.1016/j.iheduc.2008.03.001"},
 				{"scheme": "uuid", "value": "50f9f8b1-8a81-4dd5-b104-0766188d7d2c"},
 			],
-			"language": ["en-UK", "en-US"],
+			"language": ["en-US", "en-UK"],
 			"subjects": [],
 			"date": {"": "2012-02-20", "modification": "2018-11-19"},
 			"creators": {
@@ -143,6 +148,11 @@ class EpubTestFiles(unittest.TestCase):
 		},
 		"WCAG": {
 			"title": "World Cultures and Geography",
+			"titles": [
+				"World Cultures and Geography",
+				"Legends of Landforms",
+				"Why Snails Have Shells",
+			],
 			"description": None,
 			"identifiers": [
 				{"value": "41f1328c-0571-4e71-8be8-e65bc148281a"},
@@ -156,6 +166,7 @@ class EpubTestFiles(unittest.TestCase):
 		},
 		"covertest": {
 			"title": "Some title",
+			"titles": ["Some title"],
 			"description": "Lorem ipsum.",
 			"identifiers": [],
 			"language": [],

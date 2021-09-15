@@ -4,14 +4,18 @@
 	unique-identifier="pub-identifier">
 	<metadata xmlns:opf="http://www.idpf.org/2007/opf">
 		<dc:identifier id="pub-identifier">someid</dc:identifier>
-		<dc:identifier opf:scheme="isbn">9780000000001</dc:identifier>
+		<dc:identifier opf:scheme="isbn">
+			9780000000001
+		</dc:identifier>
 		<dc:identifier opf:scheme="doi">doi:10.1016/j.iheduc.2008.03.001</dc:identifier>
 		<dc:identifier opf:scheme="uuid">50f9f8b1-8a81-4dd5-b104-0766188d7d2c</dc:identifier>
 		<dc:title id="pub-title">This is an example title</dc:title>
 		<dc:language id="pub-language">en-US</dc:language>
 		<dc:language id="org-language">en-UK</dc:language>
 		<dc:date>2012-02-20</dc:date>
-		<dc:date opf:event="modification">2018-11-19</dc:date>
+		<dc:date opf:event="modification">
+			2018-11-19
+		</dc:date>
 		<dc:date opf:event="creation" />
 		<meta property="dcterms:modified">2012-10-24T15:30:00Z</meta>
 		<dc:creator opf:role="aut">Matt Garrish</dc:creator>

@@ -23,6 +23,7 @@ class EpubFile(object):
 
 	Attributes:
 		title (str): Book title.
+		titles (list): List of all book titles.
 		language (list): Language codes for the book content.
 		identifiers (list): Book identifiers, with value and scheme.
 		description (str): Book description, can be text or HTML.
@@ -61,9 +62,10 @@ class EpubFile(object):
 					self._metafields.append(child)
 
 		# Proceed to process well-known fields (some are optional and return None)
-		self.title = self._getmeta("title")
+		self.titles = self._getmetamulti("title")
+		self.title = self.titles[0] if self.titles else None
 		self.language = self._getmetamulti("language")
-		self.description = self._getmeta("description")
+		self.description = EpubFile._wstrim(self._getmeta("description"))
 		self.subjects = self._getmetamulti("subject")
 		self.meta = self._getmetafull("meta")
 
@@ -71,7 +73,7 @@ class EpubFile(object):
 		self.identifiers = []
 		for ident in self._getmetafull("identifier"):
 			if "" in ident:
-				entry = {"value": ident[""]}
+				entry = {"value": EpubFile._wstrim(ident[""])}
 				if "scheme" in ident:
 					entry["scheme"] = ident["scheme"]
 				self.identifiers.append(entry)
@@ -108,7 +110,10 @@ class EpubFile(object):
 		# Parse dates
 		# <dc:date opf:event="modification/publication/creation">datehere</dc:date>
 		datenodes = self._getmetafull("date")
-		self.dates = { entry.get("event", ""): entry[""] for entry in datenodes if "" in entry }
+		self.dates = {
+			entry.get("event", ""): EpubFile._wstrim(entry[""])
+			for entry in datenodes if "" in entry
+		}
 
 		# Parse the cover metadata to extract the image
 		self.cover = None
@@ -148,7 +153,7 @@ class EpubFile(object):
 
 	def _parsehuman(self, elem, refines):
 		# Returns name and attributes. The role attribute is a set (can be empty)
-		cname = elem[""]
+		cname = EpubFile._wstrim(elem[""])
 		attrs = {}
 		# Load role inline, if present, otherwise look for a refine
 		attrs["role"] = set([elem.get("role", None)])
@@ -159,6 +164,10 @@ class EpubFile(object):
 		attrs["file-as"] = elem.get("file-as", None)
 		if attrs["file-as"] is None and "id" in elem and elem["id"] in refines:
 			attrs["file-as"] = refines[elem["id"]].get("file-as", [None])[0]
+
+		# Trim values as spec mandates
+		attrs["file-as"] = EpubFile._wstrim(attrs["file-as"])
+		attrs["role"] = set(EpubFile._wstrim(x) for x in attrs["role"])
 
 		return (cname, attrs)
 
@@ -174,9 +183,9 @@ class EpubFile(object):
 		for field in self._metafields:
 			if re.match("(.*:)?" + tag, field.tagName):
 				if field.childNodes and field.childNodes[0].nodeType == field.childNodes[0].TEXT_NODE:
-					ret.append(field.childNodes[0].nodeValue)
+					ret.append(EpubFile._wstrim(field.childNodes[0].nodeValue))
 		# Sort for consistency
-		return sorted(ret)
+		return ret
 
 	def _getmetafull(self, tag):
 		ret = []
@@ -190,5 +199,12 @@ class EpubFile(object):
 					entry[""] = field.childNodes[0].nodeValue
 				ret.append(entry)
 		return ret
+
+	@staticmethod
+	def _wstrim(istr):
+		# According to spec, whitespace is (#x20 | #x9 | #xD | #xA)
+		if istr:
+			return istr.strip("\x20\x09\x0d\x0a")
+		return None
 
 

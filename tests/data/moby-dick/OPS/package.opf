@@ -1,19 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0" xml:lang="en" unique-identifier="pub-id" prefix="cc: http://creativecommons.org/ns#" xmlns:opf="http://www.idpf.org/2007/opf">
   <opf:metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <dc:title id="title">Moby-Dick</dc:title>
+    <dc:title id="title">
+       Moby-Dick
+    </dc:title>
     <meta refines="#title" property="title-type">main</meta>
-    <dc:creator id="creator">Herman Melville</dc:creator>
-    <dc:subject>Novel</dc:subject>
-    <dc:subject>Adventures</dc:subject>
-    <meta refines="#creator" property="file-as">MELVILLE, HERMAN</meta>
-    <meta refines="#creator" property="role" scheme="marc:relators">aut</meta>
-    <dc:identifier id="pub-id">code.google.com.epub-samples.moby-dick-basic</dc:identifier>
-    <dc:language>en-US</dc:language>
-    <meta property="dcterms:modified">2012-01-18T12:47:00Z</meta>
-    <dc:publisher>Harper &amp; Brothers, Publishers</dc:publisher>
-    <dc:contributor id="contrib1">Dave Cramer</dc:contributor>
-    <meta refines="#contrib1" property="role" scheme="marc:relators">mrk</meta>
+    <dc:creator id="creator">
+       Herman Melville
+    </dc:creator>
+    <dc:subject>
+       Novel
+    </dc:subject>
+    <dc:subject>
+       Adventures
+    </dc:subject>
+    <meta refines="#creator" property="file-as">
+       MELVILLE, HERMAN
+    </meta>
+    <meta refines="#creator" property="role" scheme="marc:relators">
+       aut
+    </meta>
+    <dc:identifier id="pub-id">
+       code.google.com.epub-samples.moby-dick-basic
+    </dc:identifier>
+    <dc:language>
+       en-US
+    </dc:language>
+    <meta property="dcterms:modified">
+       2012-01-18T12:47:00Z
+    </meta>
+    <dc:publisher>
+       Harper &amp; Brothers, Publishers
+    </dc:publisher>
+    <dc:contributor id="contrib1">
+       Dave Cramer
+    </dc:contributor>
+    <meta refines="#contrib1" property="role" scheme="marc:relators">
+       mrk
+    </meta>
     <dc:rights>This work is shared with the public using the Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0) license.</dc:rights>
     <link rel="cc:license" href="http://creativecommons.org/licenses/by-sa/3.0/"/>
     <meta property="cc:attributionURL">http://code.google.com/p/epub-samples/</meta>
