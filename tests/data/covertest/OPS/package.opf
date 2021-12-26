@@ -13,9 +13,14 @@
   </opf:metadata>
   <opf:manifest>
     <opf:item href="Text/text.html" id="text.html" media-type="application/xhtml+xml"/>
+    <opf:item href="Text/text2.html" id="text-2.html" media-type="application/xhtml+xml"/>
+    <opf:item href="Text/text3.html" id="text-3.html" media-type="application/xhtml+xml"/>
     <opf:item href="images/cover.jpg" id="cover.jpg" media-type="image/jpeg"/>
+    <opf:item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
   </opf:manifest>
   <opf:spine toc="ncx">
     <opf:itemref idref="text.html" linear="yes"/>
+    <opf:itemref idref="text-2.html" linear="yes"/>
+    <opf:itemref idref="text-3.html" linear="yes"/>
   </opf:spine>
 </opf:package>

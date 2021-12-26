@@ -1,5 +1,5 @@
 
-VERSION = '0.1.0'
+VERSION = '0.3.0'
 
 import zipfile, collections, os, re
 from xml.dom import minidom
@@ -7,6 +7,32 @@ from xml.dom import minidom
 class EpubInfoException(Exception):
 	"""Represents an exception due to a malformed epub file"""
 	pass
+
+class ManifestObj(object):
+	def __init__(self, epubobj, idname, href, media_type, properties=None):
+		self.id = idname
+		self.href = href
+		self.media_type = media_type
+		self.properties = properties
+		self._epubobj = epubobj
+
+	def content(self):
+		fullp = os.path.normpath(os.path.join(os.path.dirname(
+			self._epubobj._opfpath), self.href))
+		if fullp in self._epubobj._epubf.namelist():
+			return self._epubobj._epubf.read(fullp)
+		return None
+
+class SpineObj(object):
+	def __init__(self, epubobj, idref, properties=None):
+		self.idref = idref
+		self.properties = properties
+		self._epubobj = epubobj
+
+	def content(self):
+		if self.idref in self._epubobj.manifest:
+			return self._epubobj.manifest[self.idref].content()
+		return None
 
 class EpubFile(object):
 	"""
@@ -31,35 +57,82 @@ class EpubFile(object):
 		creators (dict): Dictionary of creator names to their role and other attributes.
 		contributors (dict): Dictionary of contributor names to their role and other attributes.
 		cover (bytes): Cover art bytes (if present).
-
+		manifest (list): List of manifest items (objects).
+		spine (list): List of dicts that represent the book spine.
+		toc (list): List dicts that contain the book TOC.
 	"""
 	def __init__(self, fileobj, getcover=False):
-		epubf = zipfile.ZipFile(fileobj, "r", allowZip64=True)
-		if "META-INF/container.xml" not in epubf.namelist():
+		self._epubf = zipfile.ZipFile(fileobj, "r", allowZip64=True)
+		if "META-INF/container.xml" not in self._epubf.namelist():
 			raise EpubInfoException("Missing META-INF/container.xml file")
 		# This XML file contains the path to the relevant metadata files
-		containerfile = epubf.read("META-INF/container.xml")
+		containerfile = self._epubf.read("META-INF/container.xml")
 		containerxmlf = minidom.parseString(containerfile)
 		# Look for the OPF file (absolute path)
-		opffile = None
+		self._opfpath = None
 		for elem in containerxmlf.getElementsByTagName('rootfile'):
 			if elem.hasAttribute("full-path") and elem.hasAttribute("media-type"):
 				if elem.getAttribute("media-type") == "application/oebps-package+xml":
-					opffile = elem.getAttribute("full-path")
+					self._opfpath = elem.getAttribute("full-path")
 
-		if opffile is None:
+		if self._opfpath is None:
 			raise EpubInfoException("Can't locate the OPF file in the META-INF/container.xml file")
-		if opffile not in epubf.namelist():
+		if self._opfpath not in self._epubf.namelist():
 			raise EpubInfoException("The OPF file is missing in the ZIP file")
 
 		# Process the OPF file for metadata
-		opfxml = minidom.parseString(epubf.read(opffile))
+		opfxml = minidom.parseString(self._epubf.read(self._opfpath))
+
+		# Read mandatory models
+		metadata = self._matchonemodel(opfxml, "metadata")
+		manifest = self._matchonemodel(opfxml, "manifest")
+		spine    = self._matchonemodel(opfxml, "spine")
+
 		# Get all metadata sections and their metadata children
 		self._metafields = []
-		for elem in opfxml.getElementsByTagNameNS("*", "metadata"):
-			for child in elem.childNodes:
-				if child.nodeType == child.ELEMENT_NODE:
-					self._metafields.append(child)
+		for child in metadata.childNodes:
+			if child.nodeType == child.ELEMENT_NODE:
+				self._metafields.append(child)
+
+		# Read the manifest with all the resources
+		self.manifest = {}
+		for child in manifest.childNodes:
+			if child.nodeType == child.ELEMENT_NODE and re.match("(.*:)?item", child.tagName):
+				if all(child.hasAttribute(x) for x in  ["id", "href", "media-type"]):
+					itemid = child.getAttribute("id")
+					prop = None
+					if child.hasAttribute("properties"):
+						prop = child.getAttribute("properties")
+
+					elem = ManifestObj(self, itemid,
+						child.getAttribute("href"),
+						child.getAttribute("media-type"), prop)
+					self.manifest[itemid] = elem
+
+		# Read the spine and its referenced TOC
+		if spine.hasAttribute("toc"):
+			self._spine_toc = spine.getAttribute("toc")
+		else:
+			self._spine_toc = None
+
+		self.spine = []
+		for child in spine.childNodes:
+			if child.nodeType == child.ELEMENT_NODE and re.match("(.*:)?itemref", child.tagName):
+				if child.hasAttribute("idref"):
+					idref = child.getAttribute("idref")
+					prop = None
+					if child.hasAttribute("properties"):
+						prop = child.getAttribute("properties")
+
+					self.spine.append(SpineObj(self, idref, prop))
+
+		# Now parse the NCX TOC
+		if self._spine_toc and self._spine_toc in self.manifest:
+			ncxfile = self.manifest[self._spine_toc].content()
+			tocxml = minidom.parseString(ncxfile)
+			self.toc = []
+			for navmap in tocxml.getElementsByTagNameNS("*", "navMap"):
+				self.toc += self.parseNavPoints(navmap.childNodes)
 
 		# Proceed to process well-known fields (some are optional and return None)
 		self.titles = self._getmetamulti("title")
@@ -118,38 +191,32 @@ class EpubFile(object):
 		# Parse the cover metadata to extract the image
 		self.cover = None
 		if getcover:
-			# Extract all the items in the manifest first
-			items = []
-			for elem in opfxml.getElementsByTagNameNS('*', 'manifest'):
-				for child in elem.childNodes:
-					if child.nodeType == child.ELEMENT_NODE:
-						if re.match("(.*:)?item", child.tagName):
-							items.append(child)
-
 			# Look for a meta that looks like:
 			# <meta name="cover" content="some_item_id"/>
-			coveritem = None
+			imgpath = None
 			for m in self.meta:
 				if m.get("name", None) == "cover":
 					# Search this item in the item list
 					coverid = m.get("content", None)
-					for it in items:
-						if it.hasAttribute("id") and it.getAttribute("id") == coverid:
-							coveritem = it
+					if coverid in self.manifest:
+						imgpath = self.manifest[coverid].href
 			# Because the spec has so many possibilites we can also find by type
-			if coveritem is None:
-				for it in items:
-					if it.hasAttribute("properties") and it.getAttribute("properties") == "cover-image":
-						coveritem = it
+			if imgpath is None:
+				for itemid, m in self.manifest.items():
+					if m.properties == "cover-image":
+						imgpath = m.href
 			# Extract the href of the image, and look it up in the zip file
-			if coveritem and coveritem.hasAttribute("href"):
-				imgpath = coveritem.getAttribute("href")
-				imgpath = os.path.normpath(os.path.join(os.path.dirname(opffile), imgpath))
-				if imgpath in epubf.namelist():
-					self.cover = epubf.read(imgpath)
+			if imgpath:
+				imgpath = os.path.normpath(os.path.join(os.path.dirname(self._opfpath), imgpath))
+				if imgpath in self._epubf.namelist():
+					self.cover = self._epubf.read(imgpath)
 
-		epubf.close()
 
+	def _matchonemodel(self, xmldoc, mname):
+		ret = xmldoc.getElementsByTagNameNS("*", mname)
+		if len(ret) != 1:
+			raise EpubInfoException("Exactly one `%s` is required in OPF" % mname)
+		return ret[0]
 
 	def _parsehuman(self, elem, refines):
 		# Returns name and attributes. The role attribute is a set (can be empty)
@@ -198,6 +265,31 @@ class EpubFile(object):
 				if field.childNodes and field.childNodes[0].nodeType == field.childNodes[0].TEXT_NODE:
 					entry[""] = field.childNodes[0].nodeValue
 				ret.append(entry)
+		return ret
+
+	def parseNavPoints(self, entities):
+		ret = []
+		for e in entities:
+			if e.nodeType == e.ELEMENT_NODE and re.match("(.*:)?navPoint", e.tagName):
+				title, href = None, None
+				for c in e.childNodes:
+					if c.nodeType == e.ELEMENT_NODE and re.match("(.*:)?navLabel", c.tagName):
+						for t in c.childNodes:
+							if t.nodeType == t.ELEMENT_NODE and re.match("(.*:)?text", t.tagName):
+								if t.firstChild:
+									title = t.firstChild.nodeValue
+					elif c.nodeType == e.ELEMENT_NODE and re.match("(.*:)?content", c.tagName):
+						if c.hasAttribute("src"):
+							href = c.getAttribute("src")
+
+				r = {
+					"title": title,
+					"href": href,
+				}
+				sube = self.parseNavPoints(e.childNodes)
+				if sube:
+					r["children"] = sube
+				ret.append(r)
 		return ret
 
 	@staticmethod
