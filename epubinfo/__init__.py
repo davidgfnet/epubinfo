@@ -127,10 +127,10 @@ class EpubFile(object):
 					self.spine.append(SpineObj(self, idref, prop))
 
 		# Now parse the NCX TOC
+		self.toc = []
 		if self._spine_toc and self._spine_toc in self.manifest:
 			ncxfile = self.manifest[self._spine_toc].content()
 			tocxml = minidom.parseString(ncxfile)
-			self.toc = []
 			for navmap in tocxml.getElementsByTagNameNS("*", "navMap"):
 				self.toc += self.parseNavPoints(navmap.childNodes)
 
