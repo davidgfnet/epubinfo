@@ -1,7 +1,7 @@
 
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 
-import zipfile, collections, os, re
+import zipfile, collections, os
 from xml.dom import minidom
 
 class EpubInfoException(Exception):
@@ -84,30 +84,23 @@ class EpubFile(object):
 		opfxml = minidom.parseString(self._epubf.read(self._opfpath))
 
 		# Read mandatory models
-		metadata = self._matchonemodel(opfxml, "metadata")
+		self._metadata = self._matchonemodel(opfxml, "metadata")
 		manifest = self._matchonemodel(opfxml, "manifest")
 		spine    = self._matchonemodel(opfxml, "spine")
 
-		# Get all metadata sections and their metadata children
-		self._metafields = []
-		for child in metadata.childNodes:
-			if child.nodeType == child.ELEMENT_NODE:
-				self._metafields.append(child)
-
 		# Read the manifest with all the resources
 		self.manifest = {}
-		for child in manifest.childNodes:
-			if child.nodeType == child.ELEMENT_NODE and re.match("(.*:)?item", child.tagName):
-				if all(child.hasAttribute(x) for x in  ["id", "href", "media-type"]):
-					itemid = child.getAttribute("id")
-					prop = None
-					if child.hasAttribute("properties"):
-						prop = child.getAttribute("properties")
+		for child in manifest.getElementsByTagNameNS("*", "item"):
+			if all(child.hasAttribute(x) for x in  ["id", "href", "media-type"]):
+				itemid = child.getAttribute("id")
+				prop = None
+				if child.hasAttribute("properties"):
+					prop = child.getAttribute("properties")
 
-					elem = ManifestObj(self, itemid,
-						child.getAttribute("href"),
-						child.getAttribute("media-type"), prop)
-					self.manifest[itemid] = elem
+				elem = ManifestObj(self, itemid,
+					child.getAttribute("href"),
+					child.getAttribute("media-type"), prop)
+				self.manifest[itemid] = elem
 
 		# Read the spine and its referenced TOC
 		if spine.hasAttribute("toc"):
@@ -116,15 +109,14 @@ class EpubFile(object):
 			self._spine_toc = None
 
 		self.spine = []
-		for child in spine.childNodes:
-			if child.nodeType == child.ELEMENT_NODE and re.match("(.*:)?itemref", child.tagName):
-				if child.hasAttribute("idref"):
-					idref = child.getAttribute("idref")
-					prop = None
-					if child.hasAttribute("properties"):
-						prop = child.getAttribute("properties")
+		for child in spine.getElementsByTagNameNS("*", "itemref"):
+			if child.hasAttribute("idref"):
+				idref = child.getAttribute("idref")
+				prop = None
+				if child.hasAttribute("properties"):
+					prop = child.getAttribute("properties")
 
-					self.spine.append(SpineObj(self, idref, prop))
+				self.spine.append(SpineObj(self, idref, prop))
 
 		# Now parse the NCX TOC
 		self.toc = []
@@ -132,13 +124,13 @@ class EpubFile(object):
 			ncxfile = self.manifest[self._spine_toc].content()
 			tocxml = minidom.parseString(ncxfile)
 			for navmap in tocxml.getElementsByTagNameNS("*", "navMap"):
-				self.toc += self.parseNavPoints(navmap.childNodes)
+				self.toc += self._parseNavPoints(navmap.childNodes)
 
 		# Proceed to process well-known fields (some are optional and return None)
 		self.titles = self._getmetamulti("title")
 		self.title = self.titles[0] if self.titles else None
 		self.language = self._getmetamulti("language")
-		self.description = EpubFile._wstrim(self._getmeta("description"))
+		self.description = self._getmetafirst("description")
 		self.subjects = self._getmetamulti("subject")
 		self.meta = self._getmetafull("meta")
 
@@ -238,47 +230,43 @@ class EpubFile(object):
 
 		return (cname, attrs)
 
-	def _getmeta(self, tag):
-		for field in self._metafields:
-			if re.match("(.*:)?" + tag, field.tagName):
-				if field.childNodes and field.childNodes[0].nodeType == field.childNodes[0].TEXT_NODE:
-					return field.childNodes[0].nodeValue
+	def _getmetafirst(self, tag):
+		for field in self._metadata.getElementsByTagNameNS("*", tag):
+			if field.childNodes and field.childNodes[0].nodeType == field.childNodes[0].TEXT_NODE:
+				return EpubFile._wstrim(field.childNodes[0].nodeValue)
 		return None
 
 	def _getmetamulti(self, tag):
 		ret = []
-		for field in self._metafields:
-			if re.match("(.*:)?" + tag, field.tagName):
-				if field.childNodes and field.childNodes[0].nodeType == field.childNodes[0].TEXT_NODE:
-					ret.append(EpubFile._wstrim(field.childNodes[0].nodeValue))
-		# Sort for consistency
+		for field in self._metadata.getElementsByTagNameNS("*", tag):
+			if field.childNodes and field.childNodes[0].nodeType == field.childNodes[0].TEXT_NODE:
+				ret.append(EpubFile._wstrim(field.childNodes[0].nodeValue))
 		return ret
 
 	def _getmetafull(self, tag):
 		ret = []
-		for field in self._metafields:
-			if re.match("(.*:)?" + tag, field.tagName):
-				entry = {}
-				for attr in field.attributes.keys():
-					cattr = attr.split(":")[-1]  # Strip namespace
-					entry[cattr] = field.getAttribute(attr)
-				if field.childNodes and field.childNodes[0].nodeType == field.childNodes[0].TEXT_NODE:
-					entry[""] = field.childNodes[0].nodeValue
-				ret.append(entry)
+		for field in self._metadata.getElementsByTagNameNS("*", tag):
+			entry = {}
+			for attr in field.attributes.keys():
+				cattr = attr.split(":")[-1]  # Strip namespace
+				entry[cattr] = field.getAttribute(attr)
+			if field.childNodes and field.childNodes[0].nodeType == field.childNodes[0].TEXT_NODE:
+				entry[""] = field.childNodes[0].nodeValue
+			ret.append(entry)
 		return ret
 
-	def parseNavPoints(self, entities):
+	def _parseNavPoints(self, entities):
 		ret = []
 		for e in entities:
-			if e.nodeType == e.ELEMENT_NODE and re.match("(.*:)?navPoint", e.tagName):
+			if e.nodeType == e.ELEMENT_NODE and e.tagName == "navPoint":
 				title, href = None, None
 				for c in e.childNodes:
-					if c.nodeType == e.ELEMENT_NODE and re.match("(.*:)?navLabel", c.tagName):
+					if c.nodeType == e.ELEMENT_NODE and c.tagName == "navLabel":
 						for t in c.childNodes:
-							if t.nodeType == t.ELEMENT_NODE and re.match("(.*:)?text", t.tagName):
+							if t.nodeType == t.ELEMENT_NODE and t.tagName == "text":
 								if t.firstChild:
 									title = t.firstChild.nodeValue
-					elif c.nodeType == e.ELEMENT_NODE and re.match("(.*:)?content", c.tagName):
+					elif c.nodeType == e.ELEMENT_NODE and c.tagName == "content":
 						if c.hasAttribute("src"):
 							href = c.getAttribute("src")
 
@@ -286,7 +274,7 @@ class EpubFile(object):
 					"title": title,
 					"href": href,
 				}
-				sube = self.parseNavPoints(e.childNodes)
+				sube = self._parseNavPoints(e.childNodes)
 				if sube:
 					r["children"] = sube
 				ret.append(r)
