@@ -25,6 +25,22 @@ TEST_METADATA = {
 		},
 		"cover": "d86dc63631ad83ca6bd27dde379771b0ebd08c291b0de1ef368d1da952580af0",
 	},
+	"epub3-spec": {
+		"title": "EPUB 3.0 Specification",
+		"titles": ["EPUB 3.0 Specification"],
+		"description": None,
+		"identifiers": [
+			{"value": "code.google.com.epub-samples.epub30-spec"},
+		],
+		"language": ["en"],
+		"subjects": [],
+		"date": {},
+		"creators": {
+			"EPUB 3 Working Group": {},
+		},
+		"contributors": {},
+		"cover": "d738460b51aef898e5a2a4d8261a57a9c67f3a6f5816e6813c9258323399de65",
+	},
 	"cc-shared-culture": {
 		"title": "Creative Commons - A Shared Culture",
 		"titles": ["Creative Commons - A Shared Culture"],
