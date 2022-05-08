@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<package xmlns="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:dcterms="http://purl.org/dc/terms/" version="3.0" xml:lang="en"
+	unique-identifier="pub-identifier">
+	<metadata xmlns:opf="http://www.idpf.org/2007/opf">
+		<dc:identifier id="pub-identifier">someid</dc:identifier>
+		<dc:title id="pub-title">This is an example title</dc:title>
+		<dc:language id="pub-language">en-US</dc:language>
+		<dc:date>2012-02-20</dc:date>
+		<dc:creator opf:role="aut">Matt Garrish</dc:creator>
+	</metadata>
+	<manifest> </manifest>
+	<spine> </spine>
+	<spine> </spine>
+</package>

@@ -179,3 +179,14 @@ TEST_CONTENT = {
 	}
 }
 
+PATCH_TESTS = [
+	'accessible_epub_3',
+	'epub3-spec',
+	'cc-shared-culture',
+	'moby-dick',
+	'torture',
+	'WCAG',
+	'covertest'
+]
+
+

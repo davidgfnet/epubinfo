@@ -5,11 +5,21 @@ import tests.data as testdata
 
 class EpubTestFiles(unittest.TestCase):
 
+	@staticmethod
+	def _gen_epub(fileobj, filep):
+		# Builds an epub based on the testing files in the specified directory
+		with zipfile.ZipFile(fileobj, "w", compression=zipfile.ZIP_STORED) as zf:
+			for bpath, _, sfiles in os.walk(filep):
+				for fn in sfiles:
+					zippath = os.path.join(bpath[len(filep) + 1:], fn)
+					with open(os.path.join(bpath, fn), "rb") as tmpfd:
+						zf.writestr(zippath, tmpfd.read())
+
 	def test_parse_empty(self):
 		with io.BytesIO() as fakefile:
 			with zipfile.ZipFile(fakefile, "w") as zf:
 				zf.writestr("foo.txt", "bar")
-			with self.assertRaises(epubinfo.EpubInfoException):
+			with self.assertRaisesRegex(epubinfo.EpubInfoException, "Missing.*container.xml"):
 				epubinfo.EpubFile(fakefile)
 
 	def test_parse_missing_opf(self):
@@ -22,27 +32,31 @@ class EpubTestFiles(unittest.TestCase):
 							<rootfile full-path="OPS/package.opf" media-type="application/oebps-package+xml"/>
 						</rootfiles>
 					</container>""")
-			with self.assertRaises(epubinfo.EpubInfoException):
+			with self.assertRaisesRegex(epubinfo.EpubInfoException, "The OPF file is missing"):
 				epubinfo.EpubFile(fakefile)
 
 	def test_parse_missing_opf_entry(self):
 		with io.BytesIO() as fakefile:
 			with zipfile.ZipFile(fakefile, "w") as zf:
 				zf.writestr("META-INF/container.xml", '<?xml version="1.0"?><foo></foo>')
-			with self.assertRaises(epubinfo.EpubInfoException):
+			with self.assertRaisesRegex(epubinfo.EpubInfoException, "Can't locate the OPF file.*"):
 				epubinfo.EpubFile(fakefile)
+
+	def test_parse_duplicated_metadata(self):
+		for tname, metafield in [('broken1', 'metadata'), ('broken2', 'manifest'), ('broken3', 'spine')]:
+			basepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', tname)
+			# Construct a FileObj that contains a ZIP with the right data
+			with io.BytesIO() as fakefile:
+				self._gen_epub(fakefile, basepath)
+				with self.assertRaisesRegex(epubinfo.EpubInfoException, "Exactly one `%s`" % metafield):
+					epubinfo.EpubFile(fakefile, getcover=True)
 
 	def test_parse_manifest(self):
 		for testf, refdata in testdata.TEST_CONTENT.items():
 			basepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', testf)
 			# Construct a FileObj that contains a ZIP with the right data
 			with io.BytesIO() as fakefile:
-				with zipfile.ZipFile(fakefile, "w") as zf:
-					for bpath, _, sfiles in os.walk(basepath):
-						for fn in sfiles:
-							zippath = os.path.join(bpath[len(basepath) + 1:], fn)
-							with open(os.path.join(bpath, fn), "rb") as tmpfd:
-								zf.writestr(zippath, tmpfd.read())
+				self._gen_epub(fakefile, basepath)
 				# Go ahead and test
 				res = epubinfo.EpubFile(fakefile, getcover=True)
 				# Check manifest and spine
@@ -66,12 +80,7 @@ class EpubTestFiles(unittest.TestCase):
 			basepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', testf)
 			# Construct a FileObj that contains a ZIP with the right data
 			with io.BytesIO() as fakefile:
-				with zipfile.ZipFile(fakefile, "w") as zf:
-					for bpath, _, sfiles in os.walk(basepath):
-						for fn in sfiles:
-							zippath = os.path.join(bpath[len(basepath) + 1:], fn)
-							with open(os.path.join(bpath, fn), "rb") as tmpfd:
-								zf.writestr(zippath, tmpfd.read())
+				self._gen_epub(fakefile, basepath)
 				# Go ahead and test
 				res = epubinfo.EpubFile(fakefile, getcover=True)
 				# Check results
@@ -88,4 +97,48 @@ class EpubTestFiles(unittest.TestCase):
 					self.assertEqual(res.cover, None)
 				else:
 					self.assertEqual(hashlib.sha256(res.cover).hexdigest(), refdata["cover"])
+
+	def test_patch_metadata(self):
+		for testf in testdata.PATCH_TESTS:
+			basepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', testf)
+			# Construct a FileObj that contains a ZIP with the right data
+			with io.BytesIO() as fakefile:
+				self._gen_epub(fakefile, basepath)
+				# Go ahead and test
+				meta1 = epubinfo.EpubFile(fakefile, getcover=True)
+				# Re-pack in a new epub and compare
+				with io.BytesIO() as fakefile2:
+					meta1.write_epub(fakefile2)
+					meta2 = epubinfo.EpubFile(fakefile2, getcover=True)
+
+					# Check results
+					self.assertEqual(meta1.titles, meta2.titles)
+					self.assertEqual(meta1.language, meta2.language)
+					self.assertEqual(meta1.subjects, meta2.subjects)
+					self.assertEqual(meta1.description, meta2.description)
+					self.assertEqual(meta1.creators, meta2.creators)
+					self.assertEqual(meta1.contributors, meta2.contributors)
+
+				# Attempt to change some fields and do it again
+				meta1.titles = ["Title 1", "Second title"]
+				meta1.description = "Example desc"
+				meta1.subjects = ["Foo", "Bar"]
+				meta1.language = ["en", "fr"]
+				meta1.creators = {
+					"Name Surname": {"file-as": "Surname, Name"},
+					"Someauth Foo": {"file-as": "Someauth Foo", "role": set({"aut", "trn"})}}
+				meta1.contributors = {
+					"Hey There": {"file-as": "Testing"},
+					"More stuff": {"role": set({"aut", "trn"})}}
+				with io.BytesIO() as fakefile3:
+					meta1.write_epub(fakefile3)
+					meta3 = epubinfo.EpubFile(fakefile3, getcover=True)
+
+					# Check results
+					self.assertEqual(meta1.titles, meta3.titles)
+					self.assertEqual(meta1.language, meta3.language)
+					self.assertEqual(meta1.subjects, meta3.subjects)
+					self.assertEqual(meta1.description, meta3.description)
+					self.assertEqual(meta1.creators, meta3.creators)
+					self.assertEqual(meta1.contributors, meta3.contributors)
 

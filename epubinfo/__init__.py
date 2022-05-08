@@ -1,8 +1,11 @@
 
-VERSION = '0.3.1'
+VERSION = '0.4.0'
 
 import zipfile, collections, os
 from xml.dom import minidom
+
+_DC_URI = "http://purl.org/dc/elements/1.1/"
+_OPF_URI = "http://www.idpf.org/2007/opf"
 
 class EpubInfoException(Exception):
 	"""Represents an exception due to a malformed epub file"""
@@ -62,6 +65,7 @@ class EpubFile(object):
 		toc (list): List dicts that contain the book TOC.
 	"""
 	def __init__(self, fileobj, getcover=False):
+		self._fileobj = fileobj
 		self._epubf = zipfile.ZipFile(fileobj, "r", allowZip64=True)
 		if "META-INF/container.xml" not in self._epubf.namelist():
 			raise EpubInfoException("Missing META-INF/container.xml file")
@@ -286,5 +290,81 @@ class EpubFile(object):
 		if istr:
 			return istr.strip("\x20\x09\x0d\x0a")
 		return None
+
+	def _wipe_metafields(self, xmlelem, tag):
+		for node in xmlelem.getElementsByTagNameNS("*", tag):
+			node.parentNode.removeChild(node)
+
+	def _add_metafields(self, docxml, parent, prefix, name, value, attrs={}):
+		node = docxml.createElement(prefix + ":" + name)
+		node.appendChild(docxml.createTextNode(value))
+		for aname, value in attrs.items():
+			node.setAttribute(aname, value)
+		parent.appendChild(node)
+
+	def _get_namespaces(self, xmlelem):
+		ret = {}
+		for name, val in xmlelem.attributes.items():
+			if name.startswith("xmlns:"):
+				ret[val] = name.split(":")[1]
+		return ret
+
+	# Generate a metadata OPF file with the updated metadata fields
+	def serialize_metadata(self):
+		# Read original XML to update
+		opfxml = minidom.parseString(self._epubf.read(self._opfpath))
+		metadata = self._matchonemodel(opfxml, "metadata")
+
+		# Ensure we have the relevant namespace prefixes
+		ns = self._get_namespaces(metadata)
+		if _DC_URI not in ns:
+			metadata.setAttribute("xmlns:dc", _DC_URI)
+		if _OPF_URI not in ns:
+			metadata.setAttribute("xmlns:opf", _OPF_URI)
+		ns = self._get_namespaces(metadata)
+		dcns, opfns = ns[_DC_URI], ns[_OPF_URI]
+
+		# Remove the relevant fields
+		for f in ["title", "subject", "language", "description", "creator", "contributor"]:
+			self._wipe_metafields(metadata, f)
+
+		for t in self.titles:
+			self._add_metafields(opfxml, metadata, dcns, "title", t)
+		for s in self.subjects:
+			self._add_metafields(opfxml, metadata, dcns, "subject", s)
+		for l in self.language:
+			self._add_metafields(opfxml, metadata, dcns, "language", l)
+		if self.description is not None:
+			self._add_metafields(opfxml, metadata, dcns, "description", self.description)
+		for tag, emap in [("creator", self.creators), ("contributor", self.contributors)]:
+			for value, attrs in emap.items():
+				if "file-as" in attrs:
+					nodeatr = {opfns + ":file-as": attrs["file-as"]}
+				else:
+					nodeatr = {}
+
+				if "role" in attrs:
+					for r in attrs["role"]:
+						nodeatr[opfns + ":role"] = r
+						self._add_metafields(opfxml, metadata, dcns, tag, value, nodeatr)
+				else:
+					self._add_metafields(opfxml, metadata, dcns, tag, value, nodeatr)
+
+		return opfxml.toxml()
+
+	# Produce a new epub file with an updated (serialized) OPF file
+	def write_epub(self, fileobj):
+		with zipfile.ZipFile(self._fileobj, "r") as izip:
+			with zipfile.ZipFile(fileobj, "w", allowZip64=True) as ozip:
+				# Write mimetype (uncompressed!)
+				ozip.writestr("mimetype", b"application/epub+zip", compress_type=zipfile.ZIP_STORED)
+
+				# Proceed to write the OPF
+				ozip.writestr(self._opfpath, self.serialize_metadata())
+
+				# Now just copy all the other files
+				for finfo in izip.infolist():
+					if finfo.filename not in ozip.namelist():
+						ozip.writestr(finfo, izip.read(finfo.filename), compress_type=zipfile.ZIP_DEFLATED)
 
 
