@@ -1,5 +1,5 @@
 
-VERSION = '0.4.1'
+VERSION = '0.4.2'
 
 import zipfile, collections, os
 from xml.dom import minidom
@@ -336,7 +336,7 @@ class EpubFile(object):
 		dcns, opfns = ns[_DC_URI], ns[_OPF_URI]
 
 		# Remove the relevant fields
-		for f in ["title", "subject", "language", "description", "creator", "contributor", "meta"]:
+		for f in ["title", "subject", "language", "description", "creator", "contributor", "meta", "dates"]:
 			self._wipe_metafields(metadata, f)
 
 		for t in self.titles:
@@ -345,6 +345,11 @@ class EpubFile(object):
 			self._add_metafields(opfxml, metadata, dcns, "subject", s)
 		for l in self.language:
 			self._add_metafields(opfxml, metadata, dcns, "language", l)
+		for evname, val in self.dates.items():
+			if evname:
+				self._add_metafields(opfxml, metadata, dcns, "date", val, {"event": evname})
+			else:
+				self._add_metafields(opfxml, metadata, dcns, "date", val)
 		if self.description is not None:
 			self._add_metafields(opfxml, metadata, dcns, "description", self.description)
 		for tag, emap in [("creator", self.creators), ("contributor", self.contributors)]:

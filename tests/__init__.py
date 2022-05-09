@@ -132,6 +132,7 @@ class EpubTestFiles(unittest.TestCase):
 				meta1.contributors = {
 					"Hey There": {"file-as": "Testing"},
 					"More stuff": {"role": set({"aut", "trn"})}}
+				meta1.dates = { "": "2010", "modification": "2020-12-12" }
 				with io.BytesIO() as fakefile3:
 					meta1.write_epub(fakefile3)
 					meta3 = epubinfo.EpubFile(fakefile3, getcover=True)
@@ -140,6 +141,7 @@ class EpubTestFiles(unittest.TestCase):
 					self.assertEqual(meta1.titles, meta3.titles)
 					self.assertEqual(meta1.language, meta3.language)
 					self.assertEqual(meta1.subjects, meta3.subjects)
+					self.assertEqual(meta1.dates, meta3.dates)
 					self.assertEqual(meta1.description, meta3.description)
 					self.assertEqual(meta1.creators, meta3.creators)
 					self.assertEqual(meta1.contributors, meta3.contributors)
