@@ -119,6 +119,7 @@ class EpubTestFiles(unittest.TestCase):
 					self.assertEqual(meta1.description, meta2.description)
 					self.assertEqual(meta1.creators, meta2.creators)
 					self.assertEqual(meta1.contributors, meta2.contributors)
+					self.assertEqual(meta1.meta, meta2.meta)
 
 				# Attempt to change some fields and do it again
 				meta1.titles = ["Title 1", "Second title"]
@@ -142,4 +143,5 @@ class EpubTestFiles(unittest.TestCase):
 					self.assertEqual(meta1.description, meta3.description)
 					self.assertEqual(meta1.creators, meta3.creators)
 					self.assertEqual(meta1.contributors, meta3.contributors)
+					self.assertEqual(meta1.meta, meta3.meta)
 
