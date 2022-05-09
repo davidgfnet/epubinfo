@@ -24,6 +24,19 @@ TEST_METADATA = {
 			"Karen Montgomery": {},
 		},
 		"cover": "d86dc63631ad83ca6bd27dde379771b0ebd08c291b0de1ef368d1da952580af0",
+		"meta": [
+			{"property": "dcterms:modified", "": "2012-10-24T15:30:00Z"},
+			{"property": "schema:accessMode", "": "textual"},
+			{"property": "schema:accessMode", "": "visual"},
+			{"property": "schema:accessModeSufficient", "": "textual,visual"},
+			{"property": "schema:accessModeSufficient", "": "textual"},
+			{"property": "schema:accessibilityHazard", "": "none"},
+			{"property": "schema:accessibilityFeature", "": "tableOfContents"},
+			{"property": "schema:accessibilityFeature", "": "readingOrder"},
+			{"property": "schema:accessibilityFeature", "": "alternativeText"},
+			{"property": "schema:accessibilitySummary", "": "This EPUB Publication meets the requirements of the EPUB Accessibility specification with conformance to WCAG 2.0 Level AA. The publication is screen reader friendly."},
+			{"property": "a11y:certifiedBy", "": "Matt Garrish"},
+		],
 	},
 	"epub3-spec": {
 		"title": "EPUB 3.0 Specification",
@@ -40,6 +53,9 @@ TEST_METADATA = {
 		},
 		"contributors": {},
 		"cover": "d738460b51aef898e5a2a4d8261a57a9c67f3a6f5816e6813c9258323399de65",
+		"meta": [
+			{"property": "dcterms:modified", "": "2012-02-27T16:38:35Z"},
+		],
 	},
 	"cc-shared-culture": {
 		"title": "Creative Commons - A Shared Culture",
@@ -58,6 +74,10 @@ TEST_METADATA = {
 			"mgylling": {},
 		},
 		"cover": "a882a31d4bb09bdac2820f4934775b977a3cb13f3101fbc3ada85b6aec16f8c2",
+		"meta": [
+			{"property": "dcterms:modified", "": "2012-01-20T12:47:00Z"},
+			{"property": "cc:attributionURL", "": "http://creativecommons.org/videos/a-shared-culture"},
+		],
 	},
 	"moby-dick": {
 		"title": "Moby-Dick",
@@ -76,6 +96,11 @@ TEST_METADATA = {
 			"Dave Cramer": {"role": set(["mrk"])},
 		},
 		"cover": "f2f18ddff9003fd06590c6e94a8a6848b48c6566560d6dddd86dd9445b9b81d5",
+		"meta": [
+			{"refines": "#title", "property": "title-type", "": "main"},
+			{"property": "dcterms:modified", "": "\n       2012-01-18T12:47:00Z\n    "},
+			{"property": "cc:attributionURL", "": "http://code.google.com/p/epub-samples/"},
+		],
 	},
 	"torture": {
 		"title": "This is an example title",
@@ -102,6 +127,20 @@ TEST_METADATA = {
 			"Karen Montgomery": {"role": set(["cmp"]), "file-as": "Montgomery, Karen"},
 		},
 		"cover": "d86dc63631ad83ca6bd27dde379771b0ebd08c291b0de1ef368d1da952580af0",
+		"meta": [
+			{"property": "dcterms:modified", "": "2012-10-24T15:30:00Z"},
+			{"property": "schema:accessMode", "": "textual"},
+			{"property": "schema:accessMode", "": "visual"},
+			{"property": "schema:accessModeSufficient", "": "textual,visual"},
+			{"property": "schema:accessModeSufficient", "": "textual"},
+			{"property": "schema:accessibilityHazard", "": "none"},
+			{"property": "schema:accessibilityFeature", "": "tableOfContents"},
+			{"property": "schema:accessibilityFeature", "": "readingOrder"},
+			{"property": "schema:accessibilityFeature", "": "alternativeText"},
+			{"property": "schema:accessibilitySummary", "": "This EPUB Publication meets the requirements of the EPUB Accessibility specification with conformance to WCAG 2.0 Level AA. The publication is screen reader friendly."},
+			{"property": "a11y:certifiedBy", "": "Matt Garrish"},
+			{"name": "cover", "content": "coverimg"},
+		],
 	},
 	"WCAG": {
 		"title": "World Cultures and Geography",
@@ -120,6 +159,24 @@ TEST_METADATA = {
 		"creators": {},
 		"contributors": {},
 		"cover": None,
+		"meta": [
+			{"property": "title-type", "refines": "#d20201e20", "": "main"},
+			{"property": "dcterms:modified", "": "2015-02-24T13:37:19Z"},
+			{"property": "dc:publisher", "": "Anonymous"},
+			{"property": "dc:date", "": "2014-12-11T09:12:52+00:00"},
+			{"property": "source-of", "refines": "#src", "": "pagination"},
+			{"property": "dcterms:title", "": "World Cultures and Geography"},
+			{"property": "dcterms:creator", "": "DAISY XML Techniques Team"},
+			{"property": "schema:accessibilityFeature", "": "alternativeText"},
+			{"property": "schema:accessibilityFeature", "": "longDescription"},
+			{"property": "schema:accessibilityFeature", "": "printPageNumbers"},
+			{"property": "schema:accessibilityFeature", "": "readingOrder"},
+			{"property": "schema:accessibilityFeature", "": "structuralNavigation"},
+			{"property": "schema:accessibilityFeature", "": "tableOfContents"},
+			{"property": "schema:accessibilityFeature", "": "unlocked"},
+			{"property": "schema:educationalRole", "": "student"},
+			{"property": "schema:typicalAgeRange", "": "18+"},
+		],
 	},
 	"covertest": {
 		"title": "Some title",
@@ -132,6 +189,14 @@ TEST_METADATA = {
 		"creators": {'Foo Bar': {'file-as': 'Foo Bar', 'role': {'aut'}}},
 		"contributors": {},
 		"cover": "f2f18ddff9003fd06590c6e94a8a6848b48c6566560d6dddd86dd9445b9b81d5",
+		"meta": [
+			{"xmlns": "http://www.idpf.org/2007/opf", "content": "0.7.2", "name": "Sigil version"},
+			{"xmlns": "http://www.idpf.org/2007/opf", "name": "cover", "content": "cover.jpg"},
+			{"xmlns": "http://www.idpf.org/2007/opf", "name": "calibre:title_sort", "content": "Some title"},
+			{"xmlns": "http://www.idpf.org/2007/opf", "name": "calibre:user_categories", "content": "{}"},
+			{"xmlns": "http://www.idpf.org/2007/opf", "name": "calibre:author_link_map", "content": '{"Foo Bar": ""}'},
+			{"name": "calibre:timestamp", "content": '2009-01-01T10:10:10'},
+		],
 	},
 }
 

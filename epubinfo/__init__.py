@@ -175,6 +175,15 @@ class EpubFile(object):
 			self.creators[cname] = {k: v for k, v in self.creators[cname].items() if v}
 		for cname in self.contributors.keys():
 			self.contributors[cname] = {k: v for k, v in self.contributors[cname].items() if v}
+		# Clear meta fields that are used to refine authors and contributors
+		wipemeta = set()
+		for fld in ["creator", "contributor"]:
+			for ecr in self._getmetafull(fld):
+				if "id" in ecr:
+					for i, elem in enumerate(self.meta):
+						if "refines" in elem and "property" in elem and elem["refines"] == "#" + ecr["id"]:
+							wipemeta.add(i)
+		self.meta = [x for i, x in enumerate(self.meta) if i not in wipemeta]
 
 		# Parse dates
 		# <dc:date opf:event="modification/publication/creation">datehere</dc:date>
