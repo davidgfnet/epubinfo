@@ -311,6 +311,7 @@ class EpubFile(object):
 		for aname, value in attrs.items():
 			node.setAttribute(aname, value)
 		parent.appendChild(node)
+		parent.appendChild(docxml.createTextNode("\n"))
 
 	def _get_namespaces(self, xmlelem):
 		ret = {}
