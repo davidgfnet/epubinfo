@@ -336,7 +336,7 @@ class EpubFile(object):
 		dcns, opfns = ns[_DC_URI], ns[_OPF_URI]
 
 		# Remove the relevant fields
-		for f in ["title", "subject", "language", "description", "creator", "contributor", "meta", "dates"]:
+		for f in ["title", "subject", "language", "description", "creator", "contributor", "meta", "date"]:
 			self._wipe_metafields(metadata, f)
 
 		for t in self.titles:

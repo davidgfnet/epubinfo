@@ -120,6 +120,7 @@ class EpubTestFiles(unittest.TestCase):
 					self.assertEqual(meta1.creators, meta2.creators)
 					self.assertEqual(meta1.contributors, meta2.contributors)
 					self.assertEqual(meta1.meta, meta2.meta)
+					self.assertEqual(meta1.dates, meta2.dates)
 
 				# Attempt to change some fields and do it again
 				meta1.titles = ["Title 1", "Second title"]
@@ -132,7 +133,7 @@ class EpubTestFiles(unittest.TestCase):
 				meta1.contributors = {
 					"Hey There": {"file-as": "Testing"},
 					"More stuff": {"role": set({"aut", "trn"})}}
-				meta1.dates = { "": "2010", "modification": "2020-12-12" }
+				meta1.dates = { "": "2010" }
 				with io.BytesIO() as fakefile3:
 					meta1.write_epub(fakefile3)
 					meta3 = epubinfo.EpubFile(fakefile3, getcover=True)
