@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.4.2"
+VERSION = "0.4.3"
 
 setuptools.setup(
 	name="epubinfo",

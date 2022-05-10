@@ -1,5 +1,5 @@
 
-VERSION = '0.4.2'
+VERSION = '0.4.3'
 
 import zipfile, collections, os
 from xml.dom import minidom
@@ -305,7 +305,10 @@ class EpubFile(object):
 			node.parentNode.removeChild(node)
 
 	def _add_metafields(self, docxml, parent, prefix, name, value, attrs={}):
-		node = docxml.createElement(prefix + ":" + name)
+		if prefix:
+			node = docxml.createElement(prefix + ":" + name)
+		else:
+			node = docxml.createElement(name)
 		if value is not None:
 			node.appendChild(docxml.createTextNode(value))
 		for aname, value in attrs.items():
@@ -367,7 +370,7 @@ class EpubFile(object):
 		for m in self.meta:
 			ma = {k: v for k, v in m.items() if k}
 			val = m[""] if "" in m else None
-			self._add_metafields(opfxml, metadata, dcns, "meta", val, ma)
+			self._add_metafields(opfxml, metadata, None, "meta", val, ma)
 
 		# Beautify the XML a bit
 		l = []
