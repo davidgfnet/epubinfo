@@ -1,5 +1,5 @@
 
-VERSION = '0.4.3'
+VERSION = '0.4.4'
 
 import zipfile, collections, os
 from xml.dom import minidom
@@ -349,7 +349,7 @@ class EpubFile(object):
 			self._add_metafields(opfxml, metadata, dcns, "language", l)
 		for evname, val in self.dates.items():
 			if evname:
-				self._add_metafields(opfxml, metadata, dcns, "date", val, {"event": evname})
+				self._add_metafields(opfxml, metadata, dcns, "date", val, {opfns + ":event": evname})
 			else:
 				self._add_metafields(opfxml, metadata, dcns, "date", val)
 		if self.description is not None:
