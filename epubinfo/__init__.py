@@ -311,7 +311,6 @@ class EpubFile(object):
 		for aname, value in attrs.items():
 			node.setAttribute(aname, value)
 		parent.appendChild(node)
-		parent.appendChild(docxml.createTextNode("\n"))
 
 	def _get_namespaces(self, xmlelem):
 		ret = {}
@@ -370,6 +369,17 @@ class EpubFile(object):
 			val = m[""] if "" in m else None
 			self._add_metafields(opfxml, metadata, dcns, "meta", val, ma)
 
+		# Beautify the XML a bit
+		l = []
+		for node in metadata.childNodes:
+			if node.nodeType != node.TEXT_NODE:
+				l.append(node)
+		for node in list(metadata.childNodes):
+			metadata.removeChild(node)
+		assert len(metadata.childNodes) == 0
+		for node in l:
+			metadata.appendChild(node)
+			metadata.appendChild(opfxml.createTextNode("\n"))
 		return opfxml.toxml()
 
 	# Produce a new epub file with an updated (serialized) OPF file
