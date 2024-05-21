@@ -1,5 +1,5 @@
 
-VERSION = '0.4.4'
+VERSION = '0.4.5'
 
 import zipfile, collections, os
 from xml.dom import minidom
@@ -195,25 +195,27 @@ class EpubFile(object):
 
 		# Parse the cover metadata to extract the image
 		self.cover = None
-		if getcover:
-			# Look for a meta that looks like:
-			# <meta name="cover" content="some_item_id"/>
-			imgpath = None
-			for m in self.meta:
-				if m.get("name", None) == "cover":
-					# Search this item in the item list
-					coverid = m.get("content", None)
-					if coverid in self.manifest:
-						imgpath = self.manifest[coverid].href
-			# Because the spec has so many possibilites we can also find by type
-			if imgpath is None:
-				for itemid, m in self.manifest.items():
-					if m.properties == "cover-image":
-						imgpath = m.href
-			# Extract the href of the image, and look it up in the zip file
-			if imgpath:
-				imgpath = os.path.normpath(os.path.join(os.path.dirname(self._opfpath), imgpath))
-				if imgpath in self._epubf.namelist():
+		self.cover_path = None
+		# Look for a meta that looks like:
+		# <meta name="cover" content="some_item_id"/>
+		imgpath = None
+		for m in self.meta:
+			if m.get("name", None) == "cover":
+				# Search this item in the item list
+				coverid = m.get("content", None)
+				if coverid in self.manifest:
+					imgpath = self.manifest[coverid].href
+		# Because the spec has so many possibilites we can also find by type
+		if imgpath is None:
+			for itemid, m in self.manifest.items():
+				if m.properties == "cover-image":
+					imgpath = m.href
+		# Extract the href of the image, and look it up in the zip file
+		if imgpath:
+			imgpath = os.path.normpath(os.path.join(os.path.dirname(self._opfpath), imgpath))
+			if imgpath in self._epubf.namelist():
+				self.cover_path = imgpath
+				if getcover:
 					self.cover = self._epubf.read(imgpath)
 
 
@@ -393,7 +395,7 @@ class EpubFile(object):
 				ozip.writestr("mimetype", b"application/epub+zip", compress_type=zipfile.ZIP_STORED)
 
 				# Proceed to write the OPF
-				ozip.writestr(self._opfpath, self.serialize_metadata())
+				ozip.writestr(self._opfpath, self.serialize_metadata(), compress_type=zipfile.ZIP_DEFLATED)
 
 				# Now just copy all the other files
 				for finfo in izip.infolist():

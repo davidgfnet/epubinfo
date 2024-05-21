@@ -24,6 +24,7 @@ TEST_METADATA = {
 			"Karen Montgomery": {},
 		},
 		"cover": "d86dc63631ad83ca6bd27dde379771b0ebd08c291b0de1ef368d1da952580af0",
+		"cover_path": "EPUB/covers/9781449328030_lrg.jpg",
 		"meta": [
 			{"property": "dcterms:modified", "": "2012-10-24T15:30:00Z"},
 			{"property": "schema:accessMode", "": "textual"},
@@ -53,6 +54,7 @@ TEST_METADATA = {
 		},
 		"contributors": {},
 		"cover": "d738460b51aef898e5a2a4d8261a57a9c67f3a6f5816e6813c9258323399de65",
+		"cover_path": "EPUB/img/epub_logo_color.jpg",
 		"meta": [
 			{"property": "dcterms:modified", "": "2012-02-27T16:38:35Z"},
 		],
@@ -74,6 +76,7 @@ TEST_METADATA = {
 			"mgylling": {},
 		},
 		"cover": "a882a31d4bb09bdac2820f4934775b977a3cb13f3101fbc3ada85b6aec16f8c2",
+		"cover_path": "EPUB/images/326261902_3fa36f548d.jpg",
 		"meta": [
 			{"property": "dcterms:modified", "": "2012-01-20T12:47:00Z"},
 			{"property": "cc:attributionURL", "": "http://creativecommons.org/videos/a-shared-culture"},
@@ -96,6 +99,7 @@ TEST_METADATA = {
 			"Dave Cramer": {"role": set(["mrk"])},
 		},
 		"cover": "f2f18ddff9003fd06590c6e94a8a6848b48c6566560d6dddd86dd9445b9b81d5",
+		"cover_path": "OPS/images/9780316000000.jpg",
 		"meta": [
 			{"refines": "#title", "property": "title-type", "": "main"},
 			{"property": "dcterms:modified", "": "\n       2012-01-18T12:47:00Z\n    "},
@@ -127,6 +131,7 @@ TEST_METADATA = {
 			"Karen Montgomery": {"role": set(["cmp"]), "file-as": "Montgomery, Karen"},
 		},
 		"cover": "d86dc63631ad83ca6bd27dde379771b0ebd08c291b0de1ef368d1da952580af0",
+		"cover_path": "EPUB/covers/9781449328030_lrg.jpg",
 		"meta": [
 			{"property": "dcterms:modified", "": "2012-10-24T15:30:00Z"},
 			{"property": "schema:accessMode", "": "textual"},
@@ -159,6 +164,7 @@ TEST_METADATA = {
 		"creators": {},
 		"contributors": {},
 		"cover": None,
+		"cover_path": None,
 		"meta": [
 			{"property": "title-type", "refines": "#d20201e20", "": "main"},
 			{"property": "dcterms:modified", "": "2015-02-24T13:37:19Z"},
@@ -189,6 +195,7 @@ TEST_METADATA = {
 		"creators": {'Foo Bar': {'file-as': 'Foo Bar', 'role': {'aut'}}},
 		"contributors": {},
 		"cover": "f2f18ddff9003fd06590c6e94a8a6848b48c6566560d6dddd86dd9445b9b81d5",
+		"cover_path": "OPS/images/cover.jpg",
 		"meta": [
 			{"xmlns": "http://www.idpf.org/2007/opf", "content": "0.7.2", "name": "Sigil version"},
 			{"xmlns": "http://www.idpf.org/2007/opf", "name": "cover", "content": "cover.jpg"},

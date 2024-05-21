@@ -97,6 +97,7 @@ class EpubTestFiles(unittest.TestCase):
 					self.assertEqual(res.cover, None)
 				else:
 					self.assertEqual(hashlib.sha256(res.cover).hexdigest(), refdata["cover"])
+				self.assertEqual(res.cover_path, refdata["cover_path"])
 				self.assertEqual(res.meta, refdata["meta"])
 
 	def test_patch_metadata(self):
